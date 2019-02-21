@@ -4,7 +4,11 @@ mod types;
 use std::sync::Arc;
 use std::error::Error;
 use builder::PipelineBuilder;
-use types::{PipelineContext, Pipeline};
+use types::{Pipeline};
+
+struct Context {
+    number: i32
+}
 
 fn main() {
     let pipeline = PipelineBuilder::new()
@@ -12,19 +16,20 @@ fn main() {
         .next(Arc::new(b))
         .build();
 
-    let _ = pipeline.call(PipelineContext{});
+    let result = pipeline.call(Context{number: 0}).expect("Failed");
+    println!("Result: {}", result.number);
 }
 
-fn a(context: PipelineContext, next: Arc<Pipeline>) -> Result<PipelineContext, Box<Error>> {
+fn a(context: Context, next: Arc<Pipeline<Context>>) -> Result<Context, Box<Error>> {
     println!("Begin A");
-    let result = next.call(context);
+    let result = next.call(Context{number: context.number * 2});
     println!("Complete A");
     return result;
 }
 
-fn b(context: PipelineContext, next: Arc<Pipeline>) -> Result<PipelineContext, Box<Error>> {
+fn b(context: Context, next: Arc<Pipeline<Context>>) -> Result<Context, Box<Error>> {
     println!("Begin B");
-    let result = next.call(context);
+    let result = next.call(Context{number: context.number + 1});
     println!("Complete B");
     return result;
 }

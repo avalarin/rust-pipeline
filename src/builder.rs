@@ -2,23 +2,23 @@ use std::sync::Arc;
 
 use crate::types::{PipelineFunction, Pipeline, PipelineElement, PipelineTail};
 
-pub struct PipelineBuilder {
-    elements: Vec<Arc<PipelineFunction>>
+pub struct PipelineBuilder<T> {
+    elements: Vec<Arc<PipelineFunction<T>>>
 }
 
-impl PipelineBuilder {
+impl <T> PipelineBuilder<T> where T: 'static {
     pub fn new() -> Self {
         PipelineBuilder{
             elements: vec![]
         }
     }
 
-    pub fn next(&mut self, func: Arc<PipelineFunction>) -> &mut Self {
+    pub fn next(&mut self, func: Arc<PipelineFunction<T>>) -> &mut Self {
         self.elements.push(func);
         self
     }
 
-    pub fn build(&self) -> Arc<Pipeline> {
+    pub fn build(&self) -> Arc<Pipeline<T>> {
         return self.elements.iter().rev().fold(
             Arc::new(PipelineTail{}),
             |pipeline,func| {
